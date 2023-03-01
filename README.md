@@ -24,7 +24,7 @@ Send SMS from within issues via [seven](https://www.seven.io).
 ### Send SMS
 
 Open a ticket and click on the `More` button with the cog icon and click on the `Send SMS` item.
-If the assignee has a mobile phone number, the recipient field with be filled with its value.
+If the assignee has a mobile phone number set, the recipient field with be filled with its value.
 
 ## Support
 
