@@ -36,6 +36,48 @@ class SevenPlugin extends Plugin {
     }
 
     public function bootstrap() {
+        Signal::connect('ticket.created', function (Ticket $ticket) {
+            $instanceConfig = $this->getInstanceConfig();
+
+            $eventMailGroupId = $instanceConfig->getEventMailGroupId();
+            if (!$eventMailGroupId) return;
+
+            $onNewTicket = $instanceConfig->getOnNewTicket();
+            if (!$onNewTicket) return;
+
+            $staff = $ticket->getAssignee();
+
+            if (!$staff) return;
+
+            if ($staff instanceof Team) $staff = $staff->getLead();
+
+            if (!$staff) return;
+
+            /** @var Staff $staff */
+            $mobile = $staff->get('mobile');
+            if (!$mobile) return;
+
+            $grp = new EmailTemplateGroup($eventMailGroupId);
+            $tpl = $grp->getNewTicketAlertMsgTemplate();
+            $body = strip_tags($tpl->getBody());
+
+            $variableReplacer = new VariableReplacer;
+            /** @var QuerySet $messages */
+            $messages = $ticket->getMessages();
+            $variableReplacer->assign('message', implode(PHP_EOL, $messages->all()));
+            $variableReplacer->assign('recipient', $staff);
+            $variableReplacer->assign('ticket', $ticket);
+            $body = $variableReplacer->replaceVars($body);
+            $body = trim($body);
+
+            $params = [
+                'text' => $body,
+                'to' => $mobile,
+            ];
+
+            $instanceConfig->sms($params);
+        });
+
         Signal::connect('ticket.view.more', function ($ticket) {
             global $thisstaff;
 
@@ -45,7 +87,7 @@ class SevenPlugin extends Plugin {
 
             $url = 'ajax.php/seven/sms/' . $ticket->getId() . '/view';
             printf('<li><a onclick="javascript: $.dialog(\'%s\', 201); return false;"', $url);
-            echo '><i class="icon-envelope"></i>' . __(' Send SMS') . '</a></li>';
+            echo '><i class=\'icon-envelope\'></i>' . __(' Send SMS') . '</a></li>';
         });
 
         Signal::connect('ajax.scp', function ($dispatcher) {
