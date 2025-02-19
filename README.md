@@ -39,4 +39,4 @@ If enabled, an SMS gets sent to the assigned staff member or team lead.
 
 Need help? Feel free to [contact us](https://www.seven.io/en/company/contact).
 
-[![MIT](https://img.shields.io/badge/Licens
+![GitHub License](https://img.shields.io/github/license/seven-io/osticket)
